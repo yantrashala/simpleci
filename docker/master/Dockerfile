@@ -11,11 +11,11 @@ ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false \
               
 USER jenkins
  
-COPY security.groovy /usr/share/jenkins/ref/init.groovy.d/security.groovy
+# COPY security.groovy /usr/share/jenkins/ref/init.groovy.d/security.groovy
 
 # install jenkins plugins
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
 
 # copy jenkins shared configuration
-COPY jenkins_config/shared $JENKINS_REF
+COPY init.color.d/ $JENKINS_REF
