@@ -1,0 +1,6 @@
+#Below are the list of plugins to be Installed
+blueocean
+ansicolor
+pipeline-utility-steps
+timestamper
+ws-cleanup
