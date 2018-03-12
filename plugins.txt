@@ -1,6 +1,8 @@
 #Below are the list of plugins to be Installed
-blueocean
-ansicolor
-pipeline-utility-steps
-timestamper
-ws-cleanup
+blueocean:1.4.2
+ansicolor:0.5.2
+pipeline-utility-steps:2.0.1
+timestamper:1.8.9
+ws-cleanup:0.34
+maven-plugin:latest
+nexus-jenkins-plugin:3.0.20180214-134325.e135900
