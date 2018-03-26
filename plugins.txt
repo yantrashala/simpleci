@@ -6,3 +6,4 @@ timestamper:1.8.9
 ws-cleanup:0.34
 maven-plugin:latest
 nexus-jenkins-plugin:3.0.20180214-134325.e135900
+docker-plugin:1.1.3
