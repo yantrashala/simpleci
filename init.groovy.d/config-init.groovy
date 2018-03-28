@@ -6,44 +6,69 @@ import hudson.scm.SCM;
 import hudson.plugins.git.*;
 import jenkins.plugins.git.GitSCMSource;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey;
 import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.impl.*;
+import com.cloudbees.plugins.credentials.*;
+import com.cloudbees.plugins.credentials.domains.*;
 
-def inst = Jenkins.getInstance()
-def desc = inst.getDescriptor("org.jenkinsci.plugins.workflow.libs.GlobalLibraries")
+	// Fetch values from Environment Variables
+	def shared_library_url 		= System.getenv("SHARED_LIBRARY_URL")
+	def shared_library_version 	= System.getenv("SHARED_LIBRARY_VERSION")
+	def shared_library_name 	= System.getenv("SHARED_LIBRARY_NAME")
+	def inst 			= Jenkins.getInstance()
+	def desc 			= inst.getDescriptor("org.jenkinsci.plugins.workflow.libs.GlobalLibraries")
+	def home_dir 			= System.getenv("JENKINS_CONF")
+	def properties 			= new ConfigSlurper().parse(new File("$home_dir/simpleci.conf").toURI().toURL())
 
-// 	Jenkins SSH Credentials
-	def system_credentials_provider = SystemCredentialsProvider.getInstance()	
-	def ssh_key_scope = CredentialsScope.GLOBAL
-    	def ssh_key_id = "jenkins-master"
-    	def ssh_key_username = "jenkins"
-    	def ssh_key_private_key_source = new BasicSSHUserPrivateKey.UsersPrivateKeySource()
-   	def ssh_key_passphrase = null
- 	def ssh_key_description = "Jenkins Master"
-    	def ssh_key_domain = com.cloudbees.plugins.credentials.domains.Domain.global()
-    	def ssh_key_creds = new BasicSSHUserPrivateKey(ssh_key_scope,ssh_key_id,ssh_key_username,ssh_key_private_key_source,ssh_key_passphrase,ssh_key_description)
+	def descript
 
-    	system_credentials_provider.addCredentials(ssh_key_domain,ssh_key_creds)
-	// this is for Legacy SCM Retrieval Method
-	// SCM scm = new GitSCM("https://git.example.com/foo.git")
-	// SCMRetriever retriever = new SCMRetriever(scm)
-	
-	// This is for Modern SCM as Retrieval Method
-	SCMSourceRetriever retriever = new SCMSourceRetriever(new GitSCMSource(
-        "scmSourceId",
-        "https://github.com/yantrashala/simpleci-shared-library.git",
-        "jenkins-master",
-        "*",
-        "",
-        false))
-	
-	def name = "global-shared-library"    
-	LibraryConfiguration libconfig = new LibraryConfiguration(name, retriever)
-	libconfig.setDefaultVersion('master')
-	libconfig.setImplicit(true)
-	libconfig.setAllowVersionOverride(false)
-	desc.get().setLibraries([libconfig])
+	// Jenkins Credentials
+	properties.credentials.each() { configName, serverConfig ->
+		Credentials creds = (Credentials) new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,
+													  serverConfig.credentialsId,
+													  serverConfig.description,
+													  serverConfig.username,serverConfig.password
+													  /*new File(serverConfig.path).text.trim()*/)
+		descript = serverConfig.credentialsId;
+		SystemCredentialsProvider.getInstance().getStore().addCredentials(Domain.global(), creds)
+	}
 
+	if(shared_library_url!=null && shared_library_version!=null && shared_library_name!=null ){
 
+		//This is for Modern SCM as Retrieval Method
+		SCMSourceRetriever retriever = new SCMSourceRetriever(new GitSCMSource(
+			"scmSourceId",
+			shared_library_url,
+			descript,
+			"*",
+			"",
+			false))
 
+		def name = shared_library_name  
+		LibraryConfiguration libconfig = new LibraryConfiguration(name, retriever)
+		libconfig.setDefaultVersion(shared_library_version)
+		libconfig.setImplicit(true)
+		libconfig.setAllowVersionOverride(false)
+		desc.get().setLibraries([libconfig])
+	}
+	//In absence of env_var, look into property file for configurations
+	else{
 
+		properties.sharedLibrary.each() { configName, serverConfig ->
+			// This is for Modern SCM as Retrieval Method
+			SCMSourceRetriever retriever = new SCMSourceRetriever(new GitSCMSource(
+				"scmSourceId",
+				serverConfig.githubURL,
+				descript,
+				"*",
+				"",
+				false))
+
+			def name = serverConfig.libraryName  
+			LibraryConfiguration libconfig = new LibraryConfiguration(name, retriever)
+			libconfig.setDefaultVersion(serverConfig.version)
+			libconfig.setImplicit(true)
+			libconfig.setAllowVersionOverride(false)
+			desc.get().setLibraries([libconfig])
+		}
+	}

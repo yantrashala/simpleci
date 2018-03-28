@@ -8,7 +8,11 @@ ENV JENKINS_REF="/usr/share/jenkins/ref/init.groovy.d/"
 # define JVM options
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false \
               -Duser.timezone=Europe/Paris
-              
+
+# define configuration path
+ENV JENKINS_CONF ="/opt"         			  
+VOLUME ["/opt"]
+
 USER jenkins
  
 # install jenkins plugins
