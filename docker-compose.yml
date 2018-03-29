@@ -10,7 +10,7 @@ services:
       - /var/jenkins_volume:/opt/jenkins
   
   template-creation:
-    image: yantrashala/simpleci-template-creation
+    image: yantrashala/simpleci-template-creation:0.1
     ports:
       - '8000:8000'
     volumes:
