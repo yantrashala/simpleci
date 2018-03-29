@@ -10,7 +10,7 @@ ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false \
               -Duser.timezone=Europe/Paris
 
 # define configuration path
-ENV JENKINS_CONF ="/opt"         			  
+ENV JENKINS_CONF="/opt"         			  
 VOLUME ["/opt"]
 
 USER jenkins
