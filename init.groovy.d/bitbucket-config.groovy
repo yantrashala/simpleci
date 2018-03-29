@@ -9,6 +9,7 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.*;
 import com.cloudbees.plugins.credentials.*;
 import com.cloudbees.plugins.credentials.domains.*;
+import java.util.Base64;
 
 	// Fetch values from Environment Variables
 	def bitbucker_url = System.getenv("BITBUCKET_URL")
@@ -26,7 +27,9 @@ import com.cloudbees.plugins.credentials.domains.*;
 		//Jenkins Credentials
 	
 		String id = java.util.UUID.randomUUID().toString()
-		Credentials c = (Credentials) new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,id, bitbucket_username, bitbucket_username, bitbucket_pass)
+		// Decode password using base64
+		byte[] valueDecoded =  Base64.getDecoder().decode(bitbucket_pass);
+		Credentials c = (Credentials) new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,id, bitbucket_username, bitbucket_username, new String(valueDecoded))
 		SystemCredentialsProvider.getInstance().getStore().addCredentials(Domain.global(), c)
 		
 		//Add bitbucket end point URLS to server list
@@ -62,7 +65,9 @@ import com.cloudbees.plugins.credentials.domains.*;
 			//Jenkins Credentials
 	
 			String id = java.util.UUID.randomUUID().toString()
-			Credentials c = (Credentials) new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,id, serverConfig.username, serverConfig.username, serverConfig.password)
+			// Decode password using base64
+			byte[] valueDecoded = Base64.getDecoder().decode(serverConfig.password);
+			Credentials c = (Credentials) new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,id, serverConfig.username, serverConfig.username, new String(valueDecoded))
 			SystemCredentialsProvider.getInstance().getStore().addCredentials(Domain.global(), c)
 			
 			//Add bitbucket end point URLS to server list
